@@ -22,6 +22,8 @@ export function GamePage() {
   }
 
   const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
+  const drawer = room.participants.find((participant) => participant.id === room.drawerId) ?? null;
+  const isPlaying = room.status === "playing";
 
   return (
     <section className="panel game-page">
@@ -42,7 +44,7 @@ export function GamePage() {
         <div className="game-page__main">
           <Card title="Canvas">
             <div className="canvas-placeholder" style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
-              Waiting for drawer...
+              {isPlaying ? "Drawing is in progress..." : "Waiting for the host to start the round..."}
             </div>
           </Card>
         </div>
@@ -56,13 +58,35 @@ export function GamePage() {
               </div>
               <div>
                 <dt>Status</dt>
-                <dd>Playing</dd>
+                <dd>{room.isDrawer ? "Drawer" : "Guesser"}</dd>
               </div>
+              <div>
+                <dt>Round</dt>
+                <dd>{isPlaying ? "1" : "Preparing"}</dd>
+              </div>
+              {drawer ? (
+                <>
+                  <div>
+                    <dt>Drawer</dt>
+                    <dd>{drawer.name}</dd>
+                  </div>
+                  {room.isDrawer ? (
+                    <div>
+                      <dt>Secret Word</dt>
+                      <dd>{room.secretWord ?? "Loading..."}</dd>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
             </dl>
           </Card>
 
-          <Card title="Your Guess">
-            <GuessForm />
+          <Card title={room.isDrawer ? "Your Drawing Prompt" : "Your Guess"}>
+            {room.isDrawer ? (
+              <p>{room.secretWord ? `Draw: ${room.secretWord}` : "Fetching your secret word..."}</p>
+            ) : (
+              <GuessForm />
+            )}
           </Card>
         </aside>
       </div>

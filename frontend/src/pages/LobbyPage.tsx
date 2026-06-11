@@ -50,6 +50,16 @@ export function LobbyPage() {
     }
   }
 
+  async function handleStartGame() {
+    try {
+      setRefreshError(null);
+      await roomStore.startGame();
+      navigate("/game");
+    } catch (caughtError) {
+      setRefreshError(caughtError instanceof Error ? caughtError.message : "Unable to start game");
+    }
+  }
+
   if (!room) {
     return null;
   }
@@ -98,7 +108,7 @@ export function LobbyPage() {
           <button
             className="button button--primary"
             disabled={room.participants.length < 2 || isLoading}
-            onClick={() => navigate("/game")}
+            onClick={handleStartGame}
           >
             {room.participants.length < 2 ? "Need 2+ players" : "Start Game"}
           </button>
