@@ -43,16 +43,16 @@ A second player joins using a valid room code and enters the same isolated lobby
 
 ### User Story 3 - Reject invalid or empty room codes (Priority: P1)
 
-A player receives clear feedback if the entered room code is missing or invalid.
+A player receives clear feedback if the entered room code is missing, malformed, or invalid.
 
 **Why this priority**: Preventing invalid room access maintains room isolation and reduces confusion.
 
-**Independent Test**: Submit an empty or invalid code and verify a visible validation message is displayed and the join attempt is blocked.
+**Independent Test**: Submit an empty, malformed, or invalid code and verify a visible validation message is displayed and the join attempt is blocked.
 
 **Acceptance Scenarios**:
 
 1. **Given** a player submits an empty room code, **When** they try to join, **Then** the system shows a clear validation message and keeps them on the join screen.
-2. **Given** a player submits a code that does not match any active room, **When** they try to join, **Then** the system shows a clear invalid-code error and does not allow entry.
+2. **Given** a player submits a code that is malformed or does not match any active room, **When** they try to join, **Then** the system shows a clear invalid-code error and does not allow entry.
 
 ---
 
@@ -99,9 +99,9 @@ Lobby state updates automatically on a periodic refresh cycle.
 
 - **FR-001**: System MUST generate a unique, shareable room code when a player creates a new room.
 - **FR-002**: System MUST assign the room creator as the host immediately on room creation.
-- **FR-003**: System MUST accept a room code on join attempts and validate it before entering a room.
+- **FR-003**: System MUST accept a room code on join attempts and validate its format and existence before entering a room.
 - **FR-004**: System MUST reject empty room codes with a clear validation message.
-- **FR-005**: System MUST reject room codes that do not match an active room with a clear invalid-code error.
+- **FR-005**: System MUST reject room codes that are malformed or do not match an active room with a clear invalid-code error.
 - **FR-006**: System MUST isolate room data so that players can only access the lobby and state for their specific room.
 - **FR-007**: System MUST allow only the host to start the game and disallow a start action from any other player.
 - **FR-008**: System MUST require at least two players before the host can start the game.
@@ -119,7 +119,7 @@ Lobby state updates automatically on a periodic refresh cycle.
 ### Measurable Outcomes
 
 - **SC-001**: Players can create or join a room with a valid code and reach the lobby successfully in at most 3 steps.
-- **SC-002**: Empty or invalid room codes produce a visible error message immediately, preventing entry.
+- **SC-002**: Empty, malformed, or nonexistent room codes produce a visible error message immediately, preventing entry.
 - **SC-003**: Only the room creator is granted host privileges and only the host can see the start control.
 - **SC-004**: The host can start the game only after at least two players are present.
 - **SC-005**: Lobby state updates automatically within approximately 2 seconds after another player joins.

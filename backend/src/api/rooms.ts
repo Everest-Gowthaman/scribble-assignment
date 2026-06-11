@@ -8,6 +8,13 @@ import {
 } from "./schemas.js";
 import { createRoom, getRoom, joinRoom, toRoomSnapshot } from "../services/roomStore.js";
 
+const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
+
+function normalizeRoomCode(code: string) {
+  const normalizedCode = code.trim().toUpperCase();
+  return ROOM_CODE_PATTERN.test(normalizedCode) ? normalizedCode : null;
+}
+
 export function createRoomsRouter() {
   const router = Router();
 
@@ -29,7 +36,13 @@ export function createRoomsRouter() {
     try {
       const { code } = roomCodeParamsSchema.parse(request.params);
       const { playerName } = joinRoomSchema.parse(request.body);
-      const result = joinRoom(code.toUpperCase(), playerName);
+      const normalizedCode = normalizeRoomCode(code);
+
+      if (!normalizedCode) {
+        throw new HttpError(404, "Unable to join room");
+      }
+
+      const result = joinRoom(normalizedCode, playerName);
 
       if (!result) {
         throw new HttpError(404, "Unable to join room");
@@ -48,7 +61,13 @@ export function createRoomsRouter() {
     try {
       const { code } = roomCodeParamsSchema.parse(request.params);
       const { participantId } = roomViewerQuerySchema.parse(request.query);
-      const room = getRoom(code.toUpperCase());
+      const normalizedCode = normalizeRoomCode(code);
+
+      if (!normalizedCode) {
+        throw new HttpError(404, "Unable to load room");
+      }
+
+      const room = getRoom(normalizedCode);
 
       if (!room) {
         throw new HttpError(404, "Unable to load room");

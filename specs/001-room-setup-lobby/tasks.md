@@ -8,9 +8,9 @@
 
 **Purpose**: Ensure the existing code structure is in place and ready for feature work.
 
-- [ ] T001 [P] Create `specs/001-room-setup-lobby/tasks.md` and confirm the feature directory structure
-- [ ] T002 [P] Verify backend and frontend dev scripts in `backend/package.json` and `frontend/package.json`
-- [ ] T003 [P] Confirm that `backend/src/api/rooms.ts`, `backend/src/services/roomStore.ts`, and `frontend/src/state/roomStore.ts` are the correct integration points for the feature
+- [X] T001 [P] Create `specs/001-room-setup-lobby/tasks.md` and confirm the feature directory structure
+- [X] T002 [P] Verify backend and frontend dev scripts in `backend/package.json` and `frontend/package.json`
+- [X] T003 [P] Confirm that `backend/src/api/rooms.ts`, `backend/src/services/roomStore.ts`, and `frontend/src/state/roomStore.ts` are the correct integration points for the feature
 
 ---
 
@@ -18,10 +18,10 @@
 
 **Purpose**: Implement the core room and lobby state model and backend contract.
 
-- [ ] T004 [US1] Add room code validation to `backend/src/api/rooms.ts` by canonicalizing room codes and rejecting invalid codes
-- [ ] T005 [US1] Update `backend/src/services/roomStore.ts` to preserve room isolation by code and support room lookup with `getRoom`
-- [ ] T006 [US1] Extend `backend/src/services/roomStore.ts` to return consistent `RoomSnapshot` values via `toRoomSnapshot`
-- [ ] T007 [US1] Confirm `frontend/src/services/api.ts` matches the contract in `specs/001-room-setup-lobby/contracts/backend-room-api.md`
+- [X] T004 [US1] Add room code validation to `backend/src/api/rooms.ts` by canonicalizing room codes and rejecting invalid codes
+- [X] T005 [US1] Update `backend/src/services/roomStore.ts` to preserve room isolation by code and support room lookup with `getRoom`
+- [X] T006 [US1] Extend `backend/src/services/roomStore.ts` to return consistent `RoomSnapshot` values via `toRoomSnapshot`
+- [X] T007 [US1] Confirm `frontend/src/services/api.ts` matches the contract in `specs/001-room-setup-lobby/contracts/backend-room-api.md`
 
 ---
 
@@ -31,11 +31,11 @@
 
 **Independent Test**: Create a room in the frontend and verify the lobby shows the room code and participant list.
 
-- [ ] T008 [US1] Implement host-aware room creation flow in `frontend/src/state/roomStore.ts`
-- [ ] T009 [US1] Ensure `frontend/src/pages/CreateRoomPage.tsx` posts room creation requests and navigates to `/lobby`
-- [ ] T010 [US1] Add server-side room state creation in `backend/src/api/rooms.ts` with unique code generation
-- [ ] T011 [US1] Add a lobby room header in `frontend/src/pages/LobbyPage.tsx` that displays the room code
-- [ ] T012 [US1] Add a participant list display in `frontend/src/pages/LobbyPage.tsx`
+- [X] T008 [US1] Implement host-aware room creation flow in `frontend/src/state/roomStore.ts`
+- [X] T009 [US1] Ensure `frontend/src/pages/CreateRoomPage.tsx` posts room creation requests and navigates to `/lobby`
+- [X] T010 [US1] Add server-side room state creation in `backend/src/api/rooms.ts` with unique code generation
+- [X] T011 [US1] Add a lobby room header in `frontend/src/pages/LobbyPage.tsx` that displays the room code
+- [X] T012 [US1] Add a participant list display in `frontend/src/pages/LobbyPage.tsx`
 
 ---
 
@@ -45,10 +45,10 @@
 
 **Independent Test**: From another browser tab, join an existing lobby and confirm the participant list shows both players.
 
-- [ ] T013 [US2] Implement room join requests in `frontend/src/state/roomStore.ts`
-- [ ] T014 [US2] Add join-room form handling in `frontend/src/pages/JoinRoomPage.tsx`
-- [ ] T015 [US2] Ensure `frontend/src/services/api.ts` posts to `/rooms/:code/join`
-- [ ] T016 [US2] Ensure `backend/src/api/rooms.ts` returns 404 for non-existent rooms on join attempts
+- [X] T013 [US2] Implement room join requests in `frontend/src/state/roomStore.ts`
+- [X] T014 [US2] Add join-room form handling in `frontend/src/pages/JoinRoomPage.tsx`
+- [X] T015 [US2] Ensure `frontend/src/services/api.ts` posts to `/rooms/:code/join`
+- [X] T016 [US2] Ensure `backend/src/api/rooms.ts` returns 404 for non-existent rooms on join attempts
 
 ---
 
@@ -58,10 +58,10 @@
 
 **Independent Test**: Submit no code or a wrong code from the join page and confirm a visible error is shown.
 
-- [ ] T017 [US3] Add empty-code validation to `frontend/src/pages/JoinRoomPage.tsx`
-- [ ] T018 [US3] Add uppercase canonicalization and invalid-code error handling in `frontend/src/pages/JoinRoomPage.tsx`
-- [ ] T019 [US3] Add `HttpError(404, "Unable to join room")` handling in `backend/src/api/rooms.ts`
-- [ ] T020 [US3] Update `frontend/src/state/roomStore.ts` to surface API error messages clearly
+- [X] T017 [US3] Add empty-code validation to `frontend/src/pages/JoinRoomPage.tsx`
+- [X] T018 [US3] Add uppercase canonicalization and invalid-code error handling in `frontend/src/pages/JoinRoomPage.tsx`
+- [X] T019 [US3] Add `HttpError(404, "Unable to join room")` handling in `backend/src/api/rooms.ts`
+- [X] T020 [US3] Update `frontend/src/state/roomStore.ts` to surface API error messages clearly
 
 ---
 
@@ -71,11 +71,11 @@
 
 **Independent Test**: Verify non-host users do not see a start button and the host cannot start until a second player joins.
 
-- [ ] T021 [US4] Add host detection to `backend/src/services/roomStore.ts` by treating the first participant as host
-- [ ] T022 [US4] Expose host information in `RoomSnapshot` returned by `toRoomSnapshot`
-- [ ] T023 [US4] Update `frontend/src/pages/LobbyPage.tsx` to conditionally render a start button only for the host
-- [ ] T024 [US4] Add a minimum player count check to disable or hide the host start control when `room.participants.length < 2`
-- [ ] T025 [US4] Add UI text explaining start restrictions in `frontend/src/pages/LobbyPage.tsx`
+- [X] T021 [US4] Add host detection to `backend/src/services/roomStore.ts` by treating the first participant as host
+- [X] T022 [US4] Expose host information in `RoomSnapshot` returned by `toRoomSnapshot`
+- [X] T023 [US4] Update `frontend/src/pages/LobbyPage.tsx` to conditionally render a start button only for the host
+- [X] T024 [US4] Add a minimum player count check to disable or hide the host start control when `room.participants.length < 2`
+- [X] T025 [US4] Add UI text explaining start restrictions in `frontend/src/pages/LobbyPage.tsx`
 
 ---
 
@@ -85,10 +85,10 @@
 
 **Independent Test**: Join a room from another tab and confirm lobby refresh updates the participant list automatically.
 
-- [ ] T026 [US5] Add a polling interval in `frontend/src/pages/LobbyPage.tsx` using `useEffect` and `setInterval`
-- [ ] T027 [US5] Ensure polling calls `roomStore.fetchRoom()` at approximately 2-second intervals
-- [ ] T028 [US5] Add cleanup for the polling interval in `frontend/src/pages/LobbyPage.tsx`
-- [ ] T029 [US5] Ensure the lobby page still navigates away if `room` becomes null or invalid
+- [X] T026 [US5] Add a polling interval in `frontend/src/pages/LobbyPage.tsx` using `useEffect` and `setInterval`
+- [X] T027 [US5] Ensure polling calls `roomStore.fetchRoom()` at approximately 2-second intervals
+- [X] T028 [US5] Add cleanup for the polling interval in `frontend/src/pages/LobbyPage.tsx`
+- [X] T029 [US5] Ensure the lobby page still navigates away if `room` becomes null or invalid
 
 ---
 
@@ -96,11 +96,11 @@
 
 **Purpose**: Final validation, error handling, and user-facing polish.
 
-- [ ] T030 [P] Add error display for backend failures in `frontend/src/pages/LobbyPage.tsx`
-- [ ] T031 [P] Ensure polling does not continue after navigating away from `/lobby`
-- [ ] T032 [P] Confirm room isolation by verifying one room code cannot be used to access another room's state
-- [ ] T033 [P] Update `specs/001-room-setup-lobby/quickstart.md` with any final validation notes
-- [ ] T034 [P] Run backend tests with `cd backend && npm test` and frontend tests with `cd frontend && npm test`
+- [X] T030 [P] Add error display for backend failures in `frontend/src/pages/LobbyPage.tsx`
+- [X] T031 [P] Ensure polling does not continue after navigating away from `/lobby`
+- [X] T032 [P] Confirm room isolation by verifying one room code cannot be used to access another room's state
+- [X] T033 [P] Update `specs/001-room-setup-lobby/quickstart.md` with any final validation notes
+- [X] T034 [P] Run backend tests with `cd backend && npm test` and frontend tests with `cd frontend && npm test`
 
 ---
 

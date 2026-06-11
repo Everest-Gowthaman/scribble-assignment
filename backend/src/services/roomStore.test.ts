@@ -9,6 +9,8 @@ describe("roomStore", () => {
     expect(result.room.participants).toHaveLength(1);
     expect(result.room.participants[0].name).toBe("Alice");
     expect(result.participantId).toBeDefined();
+    expect(result.room.hostId).toBe(result.participantId);
+    expect(result.room.hostId).toBe(result.room.participants[0].id);
   });
 
   it("joinRoom returns null for an unknown room code", () => {

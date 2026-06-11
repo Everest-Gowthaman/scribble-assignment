@@ -12,7 +12,15 @@ describe("api service", () => {
       json: () =>
         Promise.resolve({
           participantId: "p1",
-          room: { code: "ABCD", status: "lobby", participants: [] },
+          room: {
+            code: "ABCD",
+            status: "lobby",
+            hostId: "p1",
+            isHost: true,
+            participants: [],
+            availableWords: [],
+            roles: []
+          },
         }),
     };
     vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
