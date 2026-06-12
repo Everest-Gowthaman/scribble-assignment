@@ -4,9 +4,11 @@ import {
   HttpError,
   joinRoomSchema,
   roomCodeParamsSchema,
-  roomViewerQuerySchema
+  roomViewerQuerySchema,
+  guessSubmissionSchema,
+  canvasUpdateSchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, startGame, toRoomSnapshot } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, startGame, toRoomSnapshot, submitGuess, updateCanvasState } from "../services/roomStore.js";
 
 const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
 
@@ -116,6 +118,84 @@ export function createRoomsRouter() {
 
       response.json({
         room: toRoomSnapshot(room, participantId)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/guess", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = roomViewerQuerySchema.parse(request.query);
+      const { guess } = guessSubmissionSchema.parse(request.body);
+      const normalizedCode = normalizeRoomCode(code);
+
+      if (!normalizedCode || !participantId) {
+        throw new HttpError(400, "Invalid request");
+      }
+
+      const room = getRoom(normalizedCode);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to load room");
+      }
+
+      const result = submitGuess(normalizedCode, participantId, guess);
+
+      if (!result.success) {
+        throw new HttpError(400, result.error ?? "Unable to submit guess");
+      }
+
+      const updatedRoom = getRoom(normalizedCode);
+
+      if (!updatedRoom) {
+        throw new HttpError(500, "Unable to retrieve updated room");
+      }
+
+      response.json({
+        room: toRoomSnapshot(updatedRoom, participantId)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/canvas", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = roomViewerQuerySchema.parse(request.query);
+      const { canvasState } = canvasUpdateSchema.parse(request.body);
+      const normalizedCode = normalizeRoomCode(code);
+
+      if (!normalizedCode || !participantId) {
+        throw new HttpError(400, "Invalid request");
+      }
+
+      const room = getRoom(normalizedCode);
+
+      if (!room) {
+        throw new HttpError(404, "Unable to load room");
+      }
+
+      if (room.drawerId !== participantId) {
+        throw new HttpError(403, "Only the drawer can update the canvas");
+      }
+
+      const result = updateCanvasState(normalizedCode, canvasState);
+
+      if (!result.success) {
+        throw new HttpError(400, result.error ?? "Unable to update canvas");
+      }
+
+      const updatedRoom = getRoom(normalizedCode);
+
+      if (!updatedRoom) {
+        throw new HttpError(500, "Unable to retrieve updated room");
+      }
+
+      response.json({
+        room: toRoomSnapshot(updatedRoom, participantId)
       });
     } catch (error) {
       next(error);

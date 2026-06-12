@@ -6,6 +6,17 @@ export interface Participant {
   joinedAt: string;
 }
 
+export interface Guess {
+  id: string;
+  participantId: string;
+  playerName: string;
+  text: string;
+  normalizedText: string;
+  correct: boolean;
+  timestamp: string;
+  scoreImpact: number;
+}
+
 export interface RoomSnapshot {
   code: string;
   status: "lobby" | "playing";
@@ -17,6 +28,9 @@ export interface RoomSnapshot {
   participants: Participant[];
   availableWords: string[];
   roles: ParticipantRole[];
+  canvasState?: object | null;
+  guessHistory: Guess[];
+  scores: Record<string, number>;
 }
 
 export interface RoomSessionResponse {
@@ -67,6 +81,20 @@ export const api = {
     const query = participantId ? `?participantId=${encodeURIComponent(participantId)}` : "";
     return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/start${query}`, {
       method: "POST"
+    });
+  },
+  submitGuess(code: string, guess: string, participantId?: string) {
+    const query = participantId ? `?participantId=${encodeURIComponent(participantId)}` : "";
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/guess${query}`, {
+      method: "POST",
+      body: JSON.stringify({ guess })
+    });
+  },
+  submitCanvasState(code: string, canvasState: string, participantId?: string) {
+    const query = participantId ? `?participantId=${encodeURIComponent(participantId)}` : "";
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/canvas${query}`, {
+      method: "POST",
+      body: JSON.stringify({ canvasState })
     });
   }
 };

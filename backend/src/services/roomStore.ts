@@ -61,6 +61,8 @@ export function createRoom(playerName?: string) {
     status: "lobby",
     hostId: participant.id,
     participants: [participant],
+    guessHistory: [],
+    scores: {},
     createdAt: now(),
     updatedAt: now()
   };
@@ -107,9 +109,17 @@ export function startGame(code: string) {
 
   const drawerId = room.hostId;
   const secretWord = pickDeterministicWord(code);
+  
   room.status = "playing";
   room.drawerId = drawerId;
   room.secretWord = secretWord;
+  
+  // Initialize scores for all participants
+  room.scores = {};
+  for (const participant of room.participants) {
+    room.scores[participant.id] = 0;
+  }
+  
   room.updatedAt = now();
   rooms.set(room.code, room);
 
@@ -125,6 +135,71 @@ export function saveRoom(room: Room) {
   room.updatedAt = now();
   rooms.set(room.code, cloneRoom(room));
   return getRoom(room.code);
+}
+
+export function submitGuess(code: string, participantId: string, guessText: string) {
+  const room = rooms.get(code);
+
+  if (!room || room.status !== "playing") {
+    return { success: false, error: "Room is not playing" };
+  }
+
+  const trimmedGuess = guessText.trim();
+  if (!trimmedGuess) {
+    return { success: false, error: "Guess cannot be empty" };
+  }
+
+  const normalizedGuess = trimmedGuess.toLowerCase();
+  const secretWordNormalized = (room.secretWord ?? "").toLowerCase();
+  const correct = normalizedGuess === secretWordNormalized;
+
+  const guess: Guess = {
+    id: randomUUID(),
+    participantId,
+    playerName: room.participants.find((p) => p.id === participantId)?.name ?? "Unknown",
+    text: trimmedGuess,
+    normalizedText: normalizedGuess,
+    correct,
+    timestamp: now(),
+    scoreImpact: correct ? 100 : 0
+  };
+
+  room.guessHistory.push(guess);
+
+  if (correct && room.scores[participantId] !== undefined) {
+    room.scores[participantId] += 100;
+  }
+
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  return { success: true, guess };
+}
+
+export function updateCanvasState(code: string, canvasState: string): { success: boolean; error?: string } {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return {
+      success: false,
+      error: "Room not found"
+    };
+  }
+
+  if (room.status !== "playing") {
+    return {
+      success: false,
+      error: "Game is not currently active"
+    };
+  }
+
+  room.canvasState = canvasState;
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  return {
+    success: true
+  };
 }
 
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {

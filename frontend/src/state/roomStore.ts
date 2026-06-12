@@ -110,6 +110,30 @@ class RoomStore {
     this.setRoomSnapshot(response.room);
     return response.room;
   }
+
+  async submitGuess(guess: string) {
+    const room = this.state.room;
+
+    if (!room) {
+      throw new Error("No active room");
+    }
+
+    const response = await api.submitGuess(room.code, guess, this.state.participantId ?? undefined);
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
+
+  async submitCanvasState(canvasState: string) {
+    const room = this.state.room;
+
+    if (!room) {
+      throw new Error("No active room");
+    }
+
+    const response = await api.submitCanvasState(room.code, canvasState, this.state.participantId ?? undefined);
+    this.setRoomSnapshot(response.room);
+    return response.room;
+  }
 }
 
 const RoomStoreContext = createContext<RoomStore | null>(null);

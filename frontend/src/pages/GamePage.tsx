@@ -1,21 +1,57 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
+import { Canvas } from "../components/Canvas";
 import { GuessForm } from "../components/GuessForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
-import { useRoomState } from "../state/roomStore";
+import { useRoomState, useRoomStore } from "../state/roomStore";
 
 export function GamePage() {
   const navigate = useNavigate();
+  const roomStore = useRoomStore();
   const { room, participantId } = useRoomState();
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
     }
   }, [navigate, room]);
+
+  // Setup polling for game state refresh
+  useEffect(() => {
+    if (!room) {
+      return undefined;
+    }
+
+    let isMounted = true;
+    const interval = window.setInterval(async () => {
+      try {
+        await roomStore.fetchRoom();
+      } catch (caughtError) {
+        if (!isMounted) {
+          return;
+        }
+
+        setRefreshError(caughtError instanceof Error ? caughtError.message : "Unable to refresh game state");
+      }
+    }, 2000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
+  }, [room, roomStore]);
+
+  async function handleGuessSubmit(guess: string) {
+    await roomStore.submitGuess(guess);
+  }
+
+  async function handleCanvasDraw(canvasState: string) {
+    await roomStore.submitCanvasState(canvasState);
+  }
 
   if (!room) {
     return null;
@@ -38,14 +74,44 @@ export function GamePage() {
       <div className="game-page__layout">
         <aside className="game-page__sidebar game-page__sidebar--left">
           <Scoreboard />
+          <Card title="Guess History">
+            {room.guessHistory.length === 0 ? (
+              <p>No guesses yet.</p>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {room.guessHistory.map((guess) => (
+                  <li key={guess.id} style={{ paddingBottom: '8px', borderBottom: '1px solid #e5e7eb' }}>
+                    <div><strong>{guess.playerName}</strong>: {guess.text}</div>
+                    <div style={{ fontSize: '0.875rem', color: guess.correct ? '#16a34a' : '#dc2626' }}>
+                      {guess.correct ? '✓ Correct (+100)' : '✗ Incorrect'}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
           <ResultPanel />
         </aside>
 
         <div className="game-page__main">
           <Card title="Canvas">
-            <div className="canvas-placeholder" style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
-              {isPlaying ? "Drawing is in progress..." : "Waiting for the host to start the round..."}
-            </div>
+            {isPlaying ? (
+              room.isDrawer ? (
+                <Canvas disabled={!room.isDrawer} onDraw={handleCanvasDraw} />
+              ) : (
+                <div style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {room.canvasState ? (
+                    <img src={room.canvasState} style={{ maxWidth: '100%', maxHeight: '500px' }} alt="Current drawing" />
+                  ) : (
+                    <p>Waiting for the drawer to start drawing...</p>
+                  )}
+                </div>
+              )
+            ) : (
+              <div style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p>Waiting for the host to start the round...</p>
+              </div>
+            )}
           </Card>
         </div>
 
@@ -63,6 +129,10 @@ export function GamePage() {
               <div>
                 <dt>Round</dt>
                 <dd>{isPlaying ? "1" : "Preparing"}</dd>
+              </div>
+              <div>
+                <dt>Score</dt>
+                <dd>{room.scores[participantId ?? ""] ?? 0}</dd>
               </div>
               {drawer ? (
                 <>
@@ -85,11 +155,13 @@ export function GamePage() {
             {room.isDrawer ? (
               <p>{room.secretWord ? `Draw: ${room.secretWord}` : "Fetching your secret word..."}</p>
             ) : (
-              <GuessForm />
+              <GuessForm onSubmit={handleGuessSubmit} />
             )}
           </Card>
         </aside>
       </div>
+
+      {refreshError && <p style={{ color: '#dc2626', padding: '8px' }}>{refreshError}</p>}
 
       <div className="button-row">
         <button className="button button--secondary" onClick={() => navigate("/lobby")}>
