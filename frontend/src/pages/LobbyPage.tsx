@@ -14,6 +14,11 @@ export function LobbyPage() {
   useEffect(() => {
     if (!room) {
       navigate("/", { replace: true });
+      return;
+    }
+
+    if (room.status === "playing") {
+      navigate("/game", { replace: true });
     }
   }, [navigate, room]);
 
@@ -25,7 +30,11 @@ export function LobbyPage() {
     let isMounted = true;
     const interval = window.setInterval(async () => {
       try {
-        await roomStore.fetchRoom();
+        const updatedRoom = await roomStore.fetchRoom();
+
+        if (isMounted && updatedRoom?.status === "playing") {
+          navigate("/game", { replace: true });
+        }
       } catch (caughtError) {
         if (!isMounted) {
           return;
