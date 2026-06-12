@@ -48,11 +48,3 @@ Round closure. All players see correct word, sorted final scores, and full guess
 | POST | `/rooms/:code/guess?participantId=` | Submit a guess | S3 |
 | POST | `/rooms/:code/canvas?participantId=` | Update canvas state | S3 |
 | POST | `/rooms/:code/restart` | Restart game (host-only) | S4 |
-
-## State Machine
-
-```
-lobby ──(host starts, ≥2 players)──▶ playing ──(round ends)──▶ finished ──(host restarts)──▶ lobby
-  ▲                                                                                              │
-  └──────────────────────────────────────────────────────────────────────────────────────────────┘
-```
