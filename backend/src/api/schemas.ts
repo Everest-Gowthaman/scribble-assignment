@@ -24,6 +24,10 @@ export const canvasUpdateSchema = z.object({
   canvasState: z.string()
 });
 
+export const restartRoomSchema = z.object({
+  participantId: z.string()
+});
+
 export class HttpError extends Error {
   statusCode: number;
 

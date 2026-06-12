@@ -61,7 +61,7 @@ description: "Task list for Result, Restart & Final Validation feature"
 - [ ] T008 [P] [US1] Update `frontend/src/state/roomStore.ts` to handle `"finished"` status and store result data from snapshot.
 - [ ] T009 [US1] Create `ResultScreen` component in `frontend/src/components/ResultScreen.tsx` that displays the correct word, final scores, and guess history.
 - [ ] T010 [US1] Integrate `ResultScreen` into `frontend/src/pages/GamePage.tsx` when room status transitions to `"finished"`.
-- [ ] T011 [US1] Add polling in `frontend/src/pages/GamePage.tsx` to refresh room state and detect transition to `"finished"` status.
+- [ ] T011 [US1] Ensure existing polling in `frontend/src/pages/GamePage.tsx` detects the transition to `"finished"` status.
 
 **Checkpoint**: At this point, User Story 1 should be fully functional — all players see the result
 
@@ -76,7 +76,7 @@ description: "Task list for Result, Restart & Final Validation feature"
 ### Implementation for User Story 2
 
 - [ ] T012 [US2] Add `POST /rooms/:code/restart` endpoint in `backend/src/api/rooms.ts` that validates host identity and room status.
-- [ ] T013 [US2] Implement restart logic in `backend/src/services/roomStore.ts`: clear secretWord, scores, guessHistory, canvasState, drawerId; transition status to `"waiting"`; preserve participants.
+- [ ] T013 [US2] Implement restart logic in `backend/src/services/roomStore.ts`: clear secretWord, scores, guessHistory, canvasState, drawerId; transition status to `"lobby"`; preserve participants.
 - [ ] T014 [P] [US2] Add `restartRoom` API call in `frontend/src/services/api.ts`.
 - [ ] T015 [US2] Add restart action to `frontend/src/state/roomStore.ts` and wire to the API call.
 - [ ] T016 [US2] Add restart button (host-only visibility) to `ResultScreen` in `frontend/src/components/ResultScreen.tsx`.
@@ -91,7 +91,7 @@ description: "Task list for Result, Restart & Final Validation feature"
 **Purpose**: Testing, documentation, and end-to-end validation
 
 - [ ] T018 [P] Add backend tests in `backend/src/services/roomStore.test.ts` for finished state exposure, restart validation (host-only, wrong status), and round state clearing.
-- [ ] T019 [P] Add frontend tests in `frontend/src/components/ResultScreen.test.tsx` for result display and restart button visibility.
+- [ ] T019 [P] Add frontend tests in `frontend/src/services/api.test.ts` for restartRoom API call.
 - [ ] T020 [P] Update `specs/004-result-restart-validation/contracts/api.md` with any contract refinements discovered during implementation.
 - [ ] T021 Run backend and frontend builds and verify end-to-end flow using `specs/004-result-restart-validation/quickstart.md` validation scenarios.
 

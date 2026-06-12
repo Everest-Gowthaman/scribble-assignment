@@ -4,6 +4,7 @@ import { Card } from "../components/Card";
 import { Canvas } from "../components/Canvas";
 import { GuessForm } from "../components/GuessForm";
 import { ResultPanel } from "../components/ResultPanel";
+import { ResultScreen } from "../components/ResultScreen";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
 import { useRoomState, useRoomStore } from "../state/roomStore";
@@ -11,7 +12,7 @@ import { useRoomState, useRoomStore } from "../state/roomStore";
 export function GamePage() {
   const navigate = useNavigate();
   const roomStore = useRoomStore();
-  const { room, participantId } = useRoomState();
+  const { error: storeError, room, participantId } = useRoomState();
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,6 +54,14 @@ export function GamePage() {
     await roomStore.submitCanvasState(canvasState);
   }
 
+  async function handleRestart() {
+    try {
+      await roomStore.restartRoom();
+    } catch {
+      // Error is already set in roomStore state
+    }
+  }
+
   if (!room) {
     return null;
   }
@@ -60,6 +69,17 @@ export function GamePage() {
   const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
   const drawer = room.participants.find((participant) => participant.id === room.drawerId) ?? null;
   const isPlaying = room.status === "playing";
+  const isFinished = room.status === "finished";
+
+  if (isFinished) {
+    return (
+      <section className="panel game-page">
+        <RoomCodeBadge code={room.code} />
+        <ResultScreen room={room} participantId={participantId} onRestart={handleRestart} />
+        {storeError && <p style={{ color: '#dc2626', padding: '8px' }}>{storeError}</p>}
+      </section>
+    );
+  }
 
   return (
     <section className="panel game-page">

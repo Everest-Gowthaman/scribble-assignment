@@ -6,7 +6,7 @@ The room lifecycle gains a third explicit status:
 
 | Status | Description |
 |--------|-------------|
-| `waiting` | Lobby — players can join, game not started |
+| `lobby` | Lobby — players can join, game not started |
 | `playing` | Active round — drawer draws, guessers submit |
 | `finished` | Round ended — result state displayed, restart available |
 
@@ -16,7 +16,7 @@ The room lifecycle gains a third explicit status:
 
 Existing `Room` model gains:
 
-- `status`: `"waiting" | "playing" | "finished"` — current room phase
+- `status`: `"lobby" | "playing" | "finished"` — current room phase
 
 ### ResultState (new — embedded in Room when status === "finished")
 
@@ -32,7 +32,7 @@ Existing `Room` model gains:
 
 ## Relationships
 
-- A `Room` transitions `playing → finished → waiting` (lobby).
+- A `Room` transitions `playing → finished → lobby` (lobby).
 - `ResultState` is a read-only snapshot of round data; it is cleared on restart.
 - `RestartAction` is authorized against the host identity in the room.
 

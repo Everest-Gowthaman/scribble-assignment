@@ -1,14 +1,15 @@
 import { Router } from "express";
 import {
+  canvasUpdateSchema,
   createRoomSchema,
   HttpError,
-  joinRoomSchema,
-  roomCodeParamsSchema,
-  roomViewerQuerySchema,
   guessSubmissionSchema,
-  canvasUpdateSchema
+  joinRoomSchema,
+  restartRoomSchema,
+  roomCodeParamsSchema,
+  roomViewerQuerySchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, startGame, toRoomSnapshot, submitGuess, updateCanvasState } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, restartRoom, startGame, toRoomSnapshot, submitGuess, updateCanvasState } from "../services/roomStore.js";
 
 const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{4}$/;
 
@@ -196,6 +197,30 @@ export function createRoomsRouter() {
 
       response.json({
         room: toRoomSnapshot(updatedRoom, participantId)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = restartRoomSchema.parse(request.body);
+      const normalizedCode = normalizeRoomCode(code);
+
+      if (!normalizedCode || !participantId) {
+        throw new HttpError(400, "Invalid request");
+      }
+
+      const result = restartRoom(normalizedCode, participantId);
+
+      if (!result.success) {
+        throw new HttpError(result.status ?? 400, result.error ?? "Unable to restart");
+      }
+
+      response.json({
+        room: toRoomSnapshot(result.room!, participantId)
       });
     } catch (error) {
       next(error);

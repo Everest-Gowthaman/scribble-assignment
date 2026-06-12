@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Participant, Room, RoomSnapshot } from "../models/game.js";
+import type { Guess, Participant, Room, RoomSnapshot } from "../models/game.js";
 import { STARTER_ROLES, STARTER_WORDS } from "../seed/starterData.js";
 
 const rooms = new Map<string, Room>();
@@ -202,8 +202,38 @@ export function updateCanvasState(code: string, canvasState: string): { success:
   };
 }
 
+export function restartRoom(code: string, participantId: string) {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return { success: false, error: "Room not found", status: 404 };
+  }
+
+  if (room.status !== "finished") {
+    return { success: false, error: "Room is not in a finished state", status: 409 };
+  }
+
+  if (participantId !== room.hostId) {
+    return { success: false, error: "Only the host can restart the game", status: 403 };
+  }
+
+  room.status = "lobby";
+  room.drawerId = undefined;
+  room.secretWord = undefined;
+  room.canvasState = null;
+  room.guessHistory = [];
+  room.scores = {};
+  room.endedAt = undefined;
+  room.updatedAt = now();
+  rooms.set(room.code, cloneRoom(room));
+
+  return { success: true, room: cloneRoom(room) };
+}
+
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
   const isViewerDrawer = Boolean(viewerParticipantId && room.drawerId && viewerParticipantId === room.drawerId);
+  const isFinished = room.status === "finished";
+  const showSecretWord = isViewerDrawer || isFinished;
 
   return {
     code: room.code,
@@ -212,9 +242,12 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     drawerId: room.drawerId,
     isHost: Boolean(viewerParticipantId && viewerParticipantId === room.hostId),
     isDrawer: isViewerDrawer,
-    secretWord: isViewerDrawer ? room.secretWord : undefined,
+    secretWord: showSecretWord ? room.secretWord : undefined,
     participants: room.participants.map((participant) => ({ ...participant })),
     availableWords: listWords(),
-    roles: [...STARTER_ROLES]
+    roles: [...STARTER_ROLES],
+    guessHistory: room.guessHistory,
+    scores: { ...room.scores },
+    endedAt: room.endedAt
   };
 }
